@@ -1,0 +1,25 @@
+int main(int n) {
+
+int a := 2;
+int m := n;
+bool flag := false;
+
+while ((a <= n) & (m > 1)) do {
+
+  while ((m - ((m / a)*a)) == 0) do {
+    flag := true;
+    print a; print space;
+    m := (m / a)
+  };
+  if flag then {
+    print newline;
+    flag := false
+  } else {
+    skip
+  };
+  a := (a + 1)
+};
+
+0
+
+}

@@ -1,0 +1,13 @@
+int main(int a, int b, int c) {
+  pow(a,b,c)
+}
+
+int pow(int tmp54, int qil95, int qeg66) {
+  tmp54 := 1;
+  while (qeg66 > 0) do {
+   tmp54 := (tmp54 * qil95);
+   qeg66 := (qeg66 - 1)
+  };
+  tmp54
+}
+  

@@ -1,0 +1,8 @@
+int main(int n) {
+  triangle(n)
+}
+
+int triangle (int n) {
+  if (n > 0) then { (triangle((n - 1)) + n) }
+  else { 0 }
+}

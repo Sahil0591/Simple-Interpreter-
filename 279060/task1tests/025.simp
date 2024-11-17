@@ -1,0 +1,10 @@
+int main(int m, int n) {
+  skip;
+  pyramid(m,n)
+}
+
+int pyramid(int nn, int tmp) {
+  tmp := 0;
+  repeat { tmp := (tmp + (nn * nn)); nn := (nn - 1) } until (nn < 0);
+  tmp
+}

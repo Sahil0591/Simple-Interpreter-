@@ -1,0 +1,20 @@
+int main (int i1, bool flag)
+{
+int a := i1;
+bool b := flag;
+if ((f ( 10 ) == g ( 20 )) & b) then 
+   { h ( 30, a ) }
+else 
+   { j ( 3, 2, a  ) }
+}
+
+int f ( int x )  { ( x + x ) }
+
+int g ( int a )  { a }
+
+int h ( int a, int b )  { ( b - a ) }
+
+int j ( int s, int t, int u )
+{
+    if (( s + t ) == ( s + u )) then { 20 } else { 30 }
+} 
