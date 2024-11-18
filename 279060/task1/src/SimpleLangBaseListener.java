@@ -64,6 +64,18 @@ public class SimpleLangBaseListener implements SimpleLangListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterBlock(SimpleLangParser.BlockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBlock(SimpleLangParser.BlockContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterBody(SimpleLangParser.BodyContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -76,13 +88,13 @@ public class SimpleLangBaseListener implements SimpleLangListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterBlock(SimpleLangParser.BlockContext ctx) { }
+	@Override public void enterEne(SimpleLangParser.EneContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitBlock(SimpleLangParser.BlockContext ctx) { }
+	@Override public void exitEne(SimpleLangParser.EneContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -148,6 +160,30 @@ public class SimpleLangBaseListener implements SimpleLangListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterWhileExpr(SimpleLangParser.WhileExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitWhileExpr(SimpleLangParser.WhileExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterRepeatExpr(SimpleLangParser.RepeatExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitRepeatExpr(SimpleLangParser.RepeatExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterPrintExpr(SimpleLangParser.PrintExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -167,6 +203,42 @@ public class SimpleLangBaseListener implements SimpleLangListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitSpaceExpr(SimpleLangParser.SpaceExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNewLineExpr(SimpleLangParser.NewLineExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNewLineExpr(SimpleLangParser.NewLineExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSkipExpr(SimpleLangParser.SkipExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSkipExpr(SimpleLangParser.SkipExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterBoolExpr(SimpleLangParser.BoolExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBoolExpr(SimpleLangParser.BoolExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -263,6 +335,42 @@ public class SimpleLangBaseListener implements SimpleLangListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitTimesBinop(SimpleLangParser.TimesBinopContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAndBinop(SimpleLangParser.AndBinopContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAndBinop(SimpleLangParser.AndBinopContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterOrBinop(SimpleLangParser.OrBinopContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitOrBinop(SimpleLangParser.OrBinopContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterXorBinop(SimpleLangParser.XorBinopContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitXorBinop(SimpleLangParser.XorBinopContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

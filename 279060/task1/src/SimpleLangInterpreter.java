@@ -74,6 +74,11 @@ public class SimpleLangInterpreter extends AbstractParseTreeVisitor<Integer> imp
 
     }
 
+    @Override
+    public Integer visitEne(SimpleLangParser.EneContext ctx) {
+        return null;
+    }
+
     @Override public Integer visitBlock(SimpleLangParser.BlockContext ctx)
     {
         Integer returnValue = null;
@@ -177,6 +182,16 @@ public class SimpleLangInterpreter extends AbstractParseTreeVisitor<Integer> imp
 
     }
 
+    @Override
+    public Integer visitWhileExpr(SimpleLangParser.WhileExprContext ctx) {
+        return null;
+    }
+
+    @Override
+    public Integer visitRepeatExpr(SimpleLangParser.RepeatExprContext ctx) {
+        return null;
+    }
+
     @Override public Integer visitPrintExpr(SimpleLangParser.PrintExprContext ctx) {
 
         SimpleLangParser.ExpContext exp = ctx.exp();
@@ -200,6 +215,21 @@ public class SimpleLangInterpreter extends AbstractParseTreeVisitor<Integer> imp
     }
 
     @Override public Integer visitSpaceExpr(SimpleLangParser.SpaceExprContext ctx) {
+        return null;
+    }
+
+    @Override
+    public Integer visitNewLineExpr(SimpleLangParser.NewLineExprContext ctx) {
+        return null;
+    }
+
+    @Override
+    public Integer visitSkipExpr(SimpleLangParser.SkipExprContext ctx) {
+        return null;
+    }
+
+    @Override
+    public Integer visitBoolExpr(SimpleLangParser.BoolExprContext ctx) {
         return null;
     }
 
@@ -231,6 +261,21 @@ public class SimpleLangInterpreter extends AbstractParseTreeVisitor<Integer> imp
     }
     @Override public Integer visitTimesBinop(SimpleLangParser.TimesBinopContext ctx) {
         throw new RuntimeException("Should not be here!");
+    }
+
+    @Override
+    public Integer visitAndBinop(SimpleLangParser.AndBinopContext ctx) {
+        return null;
+    }
+
+    @Override
+    public Integer visitOrBinop(SimpleLangParser.OrBinopContext ctx) {
+        return null;
+    }
+
+    @Override
+    public Integer visitXorBinop(SimpleLangParser.XorBinopContext ctx) {
+        return null;
     }
 
 }

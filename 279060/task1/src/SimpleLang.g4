@@ -3,7 +3,7 @@ grammar SimpleLang;
 prog : dec+ EOF;
 
 dec
-    : typed_idfr LParen (vardec+=typed_idfr)? RParen body
+    : typed_idfr LParen (vardec+=typed_idfr (Comma vardec+=typed_idfr)*)? RParen body
 ;
 
 typed_idfr
@@ -14,22 +14,29 @@ type
     : IntType | BoolType | UnitType
 ;
 
-body
-    : LBrace ene+=exp (Semicolon ene+=exp)* RBrace
-;
-
 block
-    : LBrace ene+=exp (Semicolon ene+=exp)* RBrace
+    : LBrace ene RBrace;
+
+body
+    : LBrace (vardec+= typed_idfr Assign exp Semicolon)* ene RBrace
 ;
 
+ene
+    : exp (Semicolon exp)*
+;
 exp
     : Idfr Assign exp                                       #AssignExpr
     | LParen exp binop exp RParen                           #BinOpExpr
     | Idfr LParen (args+=exp (Comma args+=exp)*)? RParen    #InvokeExpr
     | block                                                 #BlockExpr
     | If exp Then block Else block                          #IfExpr
+    | While exp Do block                                    #WhileExpr
+    | Repeat block Until exp                                #RepeatExpr
     | Print exp                                             #PrintExpr
     | Space                                                 #SpaceExpr
+    | NewLine                                               #NewLineExpr
+    | Skip                                                  #SkipExpr
+    | BoolLit                                               #BoolExpr
     | Idfr                                                  #IdExpr
     | IntLit                                                #IntExpr
 ;
@@ -41,6 +48,9 @@ binop
     | Plus            #PlusBinop
     | Minus           #MinusBinop
     | Times           #TimesBinop
+    | And             #AndBinop
+    | Or              #OrBinop
+    | Xor             #XorBinop
 ;
 
 LParen : '(' ;
@@ -58,6 +68,10 @@ Plus : '+' ;
 Times : '*' ;
 Minus : '-' ;
 
+And : '&';
+Or : '|';
+Xor : '^';
+
 Assign : ':=' ;
 
 Print : 'print' ;
@@ -66,6 +80,11 @@ NewLine : 'newline' ;
 If : 'if' ;
 Then : 'then' ;
 Else : 'else' ;
+While : 'while';
+Do : 'do';
+Repeat : 'repeat';
+Until : 'until';
+Skip : 'skip';
 
 IntType : 'int' ;
 BoolType : 'bool' ;
