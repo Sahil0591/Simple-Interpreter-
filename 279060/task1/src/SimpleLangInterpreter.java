@@ -5,36 +5,46 @@ import java.util.*;
 
 public class SimpleLangInterpreter extends AbstractParseTreeVisitor<Integer> implements SimpleLangVisitor<Integer> {
 
-    private final Map<String, SimpleLangParser.DecContext> global_funcs = new HashMap<>();
+    private final Map<String, FunctionDetails> global_funcs = new HashMap<>();
     private final Stack<Map<String, Integer>> frames = new Stack<>();
 
-    public Integer visitProgram(SimpleLangParser.ProgContext ctx, String[] args)
-    {
+    public class FunctionDetails {
+        public final String name;
+        public final List<SimpleLangParser.Typed_idfrContext> params;
+        public final SimpleLangParser.BodyContext body;
 
-        for (int i = 0; i < ctx.dec().size(); ++i) {
-
-            SimpleLangParser.DecContext dec = ctx.dec(i);
-            SimpleLangParser.Typed_idfrContext typedIdfr = dec.typed_idfr(0);
-            global_funcs.put(typedIdfr.Idfr().getText(), dec);
-
+        public FunctionDetails(String name, List<SimpleLangParser.Typed_idfrContext> params, SimpleLangParser.BodyContext body) {
+            this.name = name;
+            this.params = params;
+            this.body = body;
+        }
+    }
+    public Integer visitProgram(SimpleLangParser.ProgContext ctx, String[] args) {
+        // Extract all declarations (functions)
+        for (SimpleLangParser.DecContext dec : ctx.dec()) {
+            String functionName = dec.typed_idfr(0).Idfr().getText();
+            // Create a simple data structure to store function details
+            FunctionDetails funcDetails = new FunctionDetails(
+                    functionName,
+                    dec.typed_idfr().subList(1, dec.typed_idfr().size()), // Parameters
+                    dec.body() // Function body
+            );
+            global_funcs.put(functionName, funcDetails); // Store the processed function details
         }
 
-        SimpleLangParser.DecContext main = global_funcs.get("main");
-
+        // Process the main function
+        FunctionDetails mainFunction = global_funcs.get("main");
         Map<String, Integer> newFrame = new HashMap<>();
-        for (int i = 0; i < args.length; ++i) {
-            if (args[i].equals("true")) {
-                newFrame.put(main.typed_idfr().get(i).Idfr().getText(), 1);
-            } else if (args[i].equals("false")) {
-                newFrame.put(main.typed_idfr().get(i).Idfr().getText(), 0);
-            } else {
-                newFrame.put(main.typed_idfr().get(i).Idfr().getText(), Integer.parseInt(args[i]));
-            }
+
+        // Bind arguments to parameters for the main function
+        for (int i = 0; i < args.length; i++) {
+            String paramName = mainFunction.params.get(i).Idfr().getText();
+            int value = args[i].equals("true") ? 1 : args[i].equals("false") ? 0 : Integer.parseInt(args[i]);
+            newFrame.put(paramName, value);
         }
 
         frames.push(newFrame);
-        return visit(main);
-
+        return visit(mainFunction.body); // Visit the body directly
     }
 
     @Override public Integer visitProg(SimpleLangParser.ProgContext ctx)
@@ -65,22 +75,12 @@ public class SimpleLangInterpreter extends AbstractParseTreeVisitor<Integer> imp
 
     @Override
     public Integer visitBody(SimpleLangParser.BodyContext ctx) {
-        Integer returnValue = null;
-
-        // Iterate through variable declarations
         for (SimpleLangParser.Typed_idfrContext varDec : ctx.vardec) {
             String varName = varDec.Idfr().getText();
-            frames.peek().put(varName, 0); // Initialize with a default value (e.g., 0)
+            frames.peek().put(varName, 0); // Initialize with default value
         }
-
-        // Visit the ene context
-        if (ctx.ene() != null) {
-            returnValue = visit(ctx.ene());
-        }
-
-        return returnValue;
+        return visit(ctx.ene());
     }
-
     @Override
     public Integer visitEne(SimpleLangParser.EneContext ctx) {
         Integer returnValue = null;
@@ -94,11 +94,10 @@ public class SimpleLangInterpreter extends AbstractParseTreeVisitor<Integer> imp
 
         return returnValue; // Return the result of the last expression
     }
-    @Override public Integer visitBlock(SimpleLangParser.BlockContext ctx)
-    {
+    @Override
+    public Integer visitBlock(SimpleLangParser.BlockContext ctx) {
         Integer returnValue = null;
-        List<SimpleLangParser.ExpContext> exps = ctx.ene().exp();
-        for (SimpleLangParser.ExpContext exp : exps) {
+        for (SimpleLangParser.ExpContext exp : ctx.ene().exp()) {
             returnValue = visit(exp);
         }
         return returnValue;
@@ -155,18 +154,24 @@ public class SimpleLangInterpreter extends AbstractParseTreeVisitor<Integer> imp
     }
     @Override
     public Integer visitInvokeExpr(SimpleLangParser.InvokeExprContext ctx) {
-        SimpleLangParser.DecContext dec = global_funcs.get(ctx.Idfr().getText());
-        Map<String, Integer> newFrame = new HashMap<>();
-
-        // Add all arguments to the new frame
-        for (int i = 0; i < ctx.args.size(); i++) {
-            SimpleLangParser.Typed_idfrContext param = dec.vardec.get(i);
-            SimpleLangParser.ExpContext arg = ctx.args.get(i);
-            newFrame.put(param.Idfr().getText(), visit(arg));
+        // Look up the function by name
+        FunctionDetails funcDetails = global_funcs.get(ctx.Idfr().getText());
+        if (funcDetails == null) {
+            throw new RuntimeException("Undefined function: " + ctx.Idfr().getText());
         }
 
-        frames.push(newFrame);
-        return visit(dec);
+        // Create a new frame for the function call
+        Map<String, Integer> newFrame = new HashMap<>();
+        for (int i = 0; i < ctx.args.size(); i++) {
+            String paramName = funcDetails.params.get(i).Idfr().getText();
+            int argValue = visit(ctx.args.get(i)); // Evaluate argument expression
+            newFrame.put(paramName, argValue);
+        }
+
+        frames.push(newFrame); // Push the new frame onto the stack
+        Integer returnValue = visit(funcDetails.body); // Execute the function body
+        frames.pop(); // Pop the frame after execution
+        return returnValue;
     }
 
     @Override public Integer visitBlockExpr(SimpleLangParser.BlockExprContext ctx) {
@@ -254,9 +259,13 @@ public class SimpleLangInterpreter extends AbstractParseTreeVisitor<Integer> imp
         return ctx.getText().equals("true") ? 1 : 0;
     }
 
-    @Override public Integer visitIdExpr(SimpleLangParser.IdExprContext ctx)
-    {
-        return frames.peek().get(ctx.Idfr().getText());
+    @Override
+    public Integer visitIdExpr(SimpleLangParser.IdExprContext ctx) {
+        String varName = ctx.Idfr().getText();
+        if (!frames.peek().containsKey(varName)) {
+            throw new RuntimeException("Undefined variable: " + varName);
+        }
+        return frames.peek().get(varName);
     }
 
     @Override public Integer visitIntExpr(SimpleLangParser.IntExprContext ctx)
