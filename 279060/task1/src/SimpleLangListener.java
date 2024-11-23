@@ -245,6 +245,18 @@ public interface SimpleLangListener extends ParseTreeListener {
 	 */
 	void exitIntExpr(SimpleLangParser.IntExprContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code InitExpr}
+	 * labeled alternative in {@link SimpleLangParser#init_expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterInitExpr(SimpleLangParser.InitExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code InitExpr}
+	 * labeled alternative in {@link SimpleLangParser#init_expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitInitExpr(SimpleLangParser.InitExprContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code EqBinop}
 	 * labeled alternative in {@link SimpleLangParser#binop}.
 	 * @param ctx the parse tree

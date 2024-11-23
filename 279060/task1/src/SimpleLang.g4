@@ -18,12 +18,12 @@ block
     : LBrace ene RBrace;
 
 body
-    : LBrace (vardec+= typed_idfr Assign exp Semicolon)* ene RBrace
+    : LBrace (vardec+= init_expr Semicolon)* ene RBrace
 ;
 
 ene
-    : exp (Semicolon exp)*
-;
+    : exp (Semicolon exp)*;
+
 exp
     : Idfr Assign exp                                       #AssignExpr
     | LParen exp binop exp RParen                           #BinOpExpr
@@ -39,6 +39,10 @@ exp
     | BoolLit                                               #BoolExpr
     | Idfr                                                  #IdExpr
     | IntLit                                                #IntExpr
+;
+
+init_expr
+    : typed_idfr Assign exp                                 #InitExpr
 ;
 
 binop

@@ -150,6 +150,13 @@ public interface SimpleLangVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitIntExpr(SimpleLangParser.IntExprContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code InitExpr}
+	 * labeled alternative in {@link SimpleLangParser#init_expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInitExpr(SimpleLangParser.InitExprContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code EqBinop}
 	 * labeled alternative in {@link SimpleLangParser#binop}.
 	 * @param ctx the parse tree
