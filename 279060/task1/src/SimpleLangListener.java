@@ -281,6 +281,30 @@ public interface SimpleLangListener extends ParseTreeListener {
 	 */
 	void exitLessEqBinop(SimpleLangParser.LessEqBinopContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code GreatBinop}
+	 * labeled alternative in {@link SimpleLangParser#binop}.
+	 * @param ctx the parse tree
+	 */
+	void enterGreatBinop(SimpleLangParser.GreatBinopContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code GreatBinop}
+	 * labeled alternative in {@link SimpleLangParser#binop}.
+	 * @param ctx the parse tree
+	 */
+	void exitGreatBinop(SimpleLangParser.GreatBinopContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code GreatEqBinop}
+	 * labeled alternative in {@link SimpleLangParser#binop}.
+	 * @param ctx the parse tree
+	 */
+	void enterGreatEqBinop(SimpleLangParser.GreatEqBinopContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code GreatEqBinop}
+	 * labeled alternative in {@link SimpleLangParser#binop}.
+	 * @param ctx the parse tree
+	 */
+	void exitGreatEqBinop(SimpleLangParser.GreatEqBinopContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code PlusBinop}
 	 * labeled alternative in {@link SimpleLangParser#binop}.
 	 * @param ctx the parse tree
@@ -316,6 +340,18 @@ public interface SimpleLangListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTimesBinop(SimpleLangParser.TimesBinopContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code DivideBinop}
+	 * labeled alternative in {@link SimpleLangParser#binop}.
+	 * @param ctx the parse tree
+	 */
+	void enterDivideBinop(SimpleLangParser.DivideBinopContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code DivideBinop}
+	 * labeled alternative in {@link SimpleLangParser#binop}.
+	 * @param ctx the parse tree
+	 */
+	void exitDivideBinop(SimpleLangParser.DivideBinopContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code AndBinop}
 	 * labeled alternative in {@link SimpleLangParser#binop}.

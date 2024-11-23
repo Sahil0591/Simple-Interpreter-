@@ -45,9 +45,12 @@ binop
     : Eq              #EqBinop
     | Less            #LessBinop
     | LessEq          #LessEqBinop
+    | Great           #GreatBinop
+    | GreatEq         #GreatEqBinop
     | Plus            #PlusBinop
     | Minus           #MinusBinop
     | Times           #TimesBinop
+    | Divide          #DivideBinop
     | And             #AndBinop
     | Or              #OrBinop
     | Xor             #XorBinop
@@ -63,10 +66,13 @@ RBrace : '}' ;
 Eq : '==' ;
 Less : '<' ;
 LessEq : '<=' ;
+Great : '>' ;
+GreatEq : '>=' ;
 
 Plus : '+' ;
 Times : '*' ;
 Minus : '-' ;
+Divide : '/' ;
 
 And : '&';
 Or : '|';

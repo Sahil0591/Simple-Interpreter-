@@ -304,6 +304,30 @@ public class SimpleLangBaseListener implements SimpleLangListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterGreatBinop(SimpleLangParser.GreatBinopContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGreatBinop(SimpleLangParser.GreatBinopContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterGreatEqBinop(SimpleLangParser.GreatEqBinopContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGreatEqBinop(SimpleLangParser.GreatEqBinopContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterPlusBinop(SimpleLangParser.PlusBinopContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -335,6 +359,18 @@ public class SimpleLangBaseListener implements SimpleLangListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitTimesBinop(SimpleLangParser.TimesBinopContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterDivideBinop(SimpleLangParser.DivideBinopContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitDivideBinop(SimpleLangParser.DivideBinopContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

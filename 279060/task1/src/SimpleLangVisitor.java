@@ -171,6 +171,20 @@ public interface SimpleLangVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitLessEqBinop(SimpleLangParser.LessEqBinopContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code GreatBinop}
+	 * labeled alternative in {@link SimpleLangParser#binop}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGreatBinop(SimpleLangParser.GreatBinopContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code GreatEqBinop}
+	 * labeled alternative in {@link SimpleLangParser#binop}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGreatEqBinop(SimpleLangParser.GreatEqBinopContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code PlusBinop}
 	 * labeled alternative in {@link SimpleLangParser#binop}.
 	 * @param ctx the parse tree
@@ -191,6 +205,13 @@ public interface SimpleLangVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitTimesBinop(SimpleLangParser.TimesBinopContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code DivideBinop}
+	 * labeled alternative in {@link SimpleLangParser#binop}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDivideBinop(SimpleLangParser.DivideBinopContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code AndBinop}
 	 * labeled alternative in {@link SimpleLangParser#binop}.

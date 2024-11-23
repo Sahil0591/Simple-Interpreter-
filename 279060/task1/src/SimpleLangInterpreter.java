@@ -20,32 +20,36 @@ public class SimpleLangInterpreter extends AbstractParseTreeVisitor<Integer> imp
         }
     }
     public Integer visitProgram(SimpleLangParser.ProgContext ctx, String[] args) {
-        // Extract all declarations (functions)
+        System.out.println("Arguments passed to program: " + Arrays.toString(args));
+
         for (SimpleLangParser.DecContext dec : ctx.dec()) {
             String functionName = dec.typed_idfr(0).Idfr().getText();
-            // Create a simple data structure to store function details
             FunctionDetails funcDetails = new FunctionDetails(
                     functionName,
-                    dec.typed_idfr().subList(1, dec.typed_idfr().size()), // Parameters
-                    dec.body() // Function body
+                    dec.typed_idfr().subList(1, dec.typed_idfr().size()),
+                    dec.body()
             );
-            global_funcs.put(functionName, funcDetails); // Store the processed function details
+            global_funcs.put(functionName, funcDetails);
         }
-
-        // Process the main function
         FunctionDetails mainFunction = global_funcs.get("main");
-        Map<String, Integer> newFrame = new HashMap<>();
+        System.out.println("Main function details: " + mainFunction.name + ", parameters: " + mainFunction.params);
 
-        // Bind arguments to parameters for the main function
+        Map<String, Integer> newFrame = new HashMap<>();
         for (int i = 0; i < args.length; i++) {
             String paramName = mainFunction.params.get(i).Idfr().getText();
             int value = args[i].equals("true") ? 1 : args[i].equals("false") ? 0 : Integer.parseInt(args[i]);
             newFrame.put(paramName, value);
+            System.out.println("Bound parameter " + paramName + " to value " + value);
         }
 
         frames.push(newFrame);
-        return visit(mainFunction.body); // Visit the body directly
+        System.out.println("Frame pushed: " + newFrame);
+        Integer result = visit(mainFunction.body);
+        System.out.println("Final result of program: " + result);
+
+        return result;
     }
+
 
     @Override public Integer visitProg(SimpleLangParser.ProgContext ctx)
     {
@@ -78,21 +82,37 @@ public class SimpleLangInterpreter extends AbstractParseTreeVisitor<Integer> imp
         for (SimpleLangParser.Typed_idfrContext varDec : ctx.vardec) {
             String varName = varDec.Idfr().getText();
             frames.peek().put(varName, 0); // Initialize with default value
+            System.out.println("Initialized variable " + varName + " to 0");
         }
-        return visit(ctx.ene());
+
+        Integer returnValue = visit(ctx.ene());
+        System.out.println("Body execution returned: " + returnValue);
+
+        return returnValue;
     }
+
     @Override
     public Integer visitEne(SimpleLangParser.EneContext ctx) {
-        Integer returnValue = null;
-
-        // Check if ctx.exp() is a list
-        if (ctx.exp() != null) {
-            for (SimpleLangParser.ExpContext expContext : ctx.exp()) {
-                returnValue = visit(expContext); // Visit each expression in the list
-            }
+        // Check if the context is null
+        if (ctx == null) {
+            System.err.println("Error: EneContext is null");
+            return null; // Or throw an exception
         }
 
-        return returnValue; // Return the result of the last expression
+        // Check if the context contains any expressions
+        if (ctx.exp() == null || ctx.exp().isEmpty()) {
+            System.err.println("Warning: EneContext has no expressions");
+            return null;
+        }
+
+        Integer returnValue = null;
+
+        // Visit each expression in the context
+        for (SimpleLangParser.ExpContext expContext : ctx.exp()) {
+            returnValue = visit(expContext);
+        }
+
+        return returnValue;
     }
     @Override
     public Integer visitBlock(SimpleLangParser.BlockContext ctx) {
@@ -111,91 +131,139 @@ public class SimpleLangInterpreter extends AbstractParseTreeVisitor<Integer> imp
         return value;
     }
 
-    @Override public Integer visitBinOpExpr(SimpleLangParser.BinOpExprContext ctx) {
+    @Override
+    public Integer visitBinOpExpr(SimpleLangParser.BinOpExprContext ctx) {
+        // Evaluate operands
+        Integer oprnd1 = visit(ctx.exp(0));
+        Integer oprnd2 = visit(ctx.exp(1));
 
-        SimpleLangParser.ExpContext operand1 = ctx.exp(0);
-        Integer oprnd1 = visit(operand1);
-        SimpleLangParser.ExpContext operand2 = ctx.exp(1);
-        Integer oprnd2 = visit(operand2);
+        // Log operand values and operator
+        System.out.println("Binary operation: " + ctx.binop().getText());
+        System.out.println("Operand 1: " + oprnd1 + ", Operand 2: " + oprnd2);
 
-        switch (((TerminalNode) (ctx.binop().getChild(0))).getSymbol().getType()) {
-            case SimpleLangParser.Eq ->  {
-                return ((Objects.equals(oprnd1, oprnd2)) ? 1 : 0);
-            }
-            case SimpleLangParser.Less -> {
-                return ((oprnd1 < oprnd2) ? 1 : 0);
-            }
-            case SimpleLangParser.LessEq -> {
-                return ((oprnd1 <= oprnd2) ? 1 : 0);
-            }
+        // Null safety check
+        if (oprnd1 == null || oprnd2 == null) {
+            throw new RuntimeException("Binary operation with null operand.");
+        }
+
+        // Determine the result based on the operator
+        Integer result;
+        switch (((TerminalNode) ctx.binop().getChild(0)).getSymbol().getType()) {
             case SimpleLangParser.Plus -> {
-                return oprnd1 + oprnd2;
+                result = oprnd1 + oprnd2;
+                System.out.println("Performed addition. Result: " + result);
             }
             case SimpleLangParser.Minus -> {
-                return oprnd1 - oprnd2;
+                result = oprnd1 - oprnd2;
+                System.out.println("Performed subtraction. Result: " + result);
             }
             case SimpleLangParser.Times -> {
-                return oprnd1 * oprnd2;
+                result = oprnd1 * oprnd2;
+                System.out.println("Performed multiplication. Result: " + result);
+            }
+            case SimpleLangParser.Divide -> {
+                if (oprnd2 == 0) {
+                    throw new RuntimeException("Division by zero.");
+                }
+                result = oprnd1 / oprnd2;
+                System.out.println("Performed division. Result: " + result);
+            }
+            case SimpleLangParser.Eq -> {
+                result = oprnd1.equals(oprnd2) ? 1 : 0;
+                System.out.println("Performed equality check. Result: " + result);
+            }
+            case SimpleLangParser.Less -> {
+                result = (oprnd1 < oprnd2) ? 1 : 0;
+                System.out.println("Performed less-than check. Result: " + result);
+            }
+            case SimpleLangParser.Great -> {
+                result = (oprnd1 > oprnd2) ? 1 : 0;
+                System.out.println("Performed greater-than check. Result: " + result);
+            }
+            case SimpleLangParser.LessEq -> {
+                result = (oprnd1 <= oprnd2) ? 1 : 0;
+                System.out.println("Performed less-than-or-equal-to check. Result: " + result);
+            }
+            case SimpleLangParser.GreatEq -> {
+                result = (oprnd1 >= oprnd2) ? 1 : 0;
+                System.out.println("Performed greater-than-or-equal-to check. Result: " + result);
             }
             case SimpleLangParser.And -> {
-                return (oprnd1 != 0 && oprnd2 != 0) ? 1 : 0;
+                result = (oprnd1 & oprnd2);
+                System.out.println("Performed logical AND. Result: " + result);
             }
             case SimpleLangParser.Or -> {
-                return (oprnd1 != 0 || oprnd2 != 0) ? 1 : 0;
+                result = (oprnd1 | oprnd2);
+                System.out.println("Performed logical OR. Result: " + result);
             }
-            case SimpleLangParser.Xor -> {
-                return ((oprnd1 != 0) ^ (oprnd2 != 0)) ? 1 : 0;
-            }
-            default -> {
-                throw new RuntimeException("Shouldn't be here - wrong binary operator.");
-            }
+            default -> throw new RuntimeException("Unsupported binary operator: " + ctx.binop().getText());
         }
 
+        // Log the final result of the binary operation
+        System.out.println("Binary operation result: " + result);
+        return result;
     }
+
+
     @Override
     public Integer visitInvokeExpr(SimpleLangParser.InvokeExprContext ctx) {
-        // Look up the function by name
-        FunctionDetails funcDetails = global_funcs.get(ctx.Idfr().getText());
+        String functionName = ctx.Idfr().getText();
+        FunctionDetails funcDetails = global_funcs.get(functionName);
         if (funcDetails == null) {
-            throw new RuntimeException("Undefined function: " + ctx.Idfr().getText());
+            throw new RuntimeException("Undefined function: " + functionName);
         }
 
-        // Create a new frame for the function call
+        // Debug: Verify context alignment
+        System.out.println("Invoking function: " + functionName);
+        System.out.println("Function parameters: " + funcDetails.params);
+        System.out.println("Arguments in ctx: " + ctx.args);
+
+        // Create a new frame for the function
         Map<String, Integer> newFrame = new HashMap<>();
         for (int i = 0; i < ctx.args.size(); i++) {
             String paramName = funcDetails.params.get(i).Idfr().getText();
-            int argValue = visit(ctx.args.get(i)); // Evaluate argument expression
+            Integer argValue = visit(ctx.args.get(i)); // Evaluate arguments
+            if (argValue == null) {
+                throw new RuntimeException("Argument " + ctx.args.get(i).getText() + " evaluated to null.");
+            }
             newFrame.put(paramName, argValue);
+            System.out.println("Mapped parameter " + paramName + " to value " + argValue);
         }
 
-        frames.push(newFrame); // Push the new frame onto the stack
-        Integer returnValue = visit(funcDetails.body); // Execute the function body
-        frames.pop(); // Pop the frame after execution
+        // Push the frame and execute the function body
+        frames.push(newFrame);
+        System.out.println("Frame before function execution: " + frames);
+
+        Integer returnValue;
+        try {
+            returnValue = visit(funcDetails.body);
+        } finally {
+            frames.pop(); // Ensure proper cleanup of the frame
+        }
+
+        System.out.println("Function " + functionName + " returned: " + returnValue);
         return returnValue;
     }
+
 
     @Override public Integer visitBlockExpr(SimpleLangParser.BlockExprContext ctx) {
         return visit(ctx.block());
     }
 
-    @Override public Integer visitIfExpr(SimpleLangParser.IfExprContext ctx)
-    {
+    @Override
+    public Integer visitIfExpr(SimpleLangParser.IfExprContext ctx) {
+        Integer condValue = visit(ctx.exp());
+        System.out.println("Condition evaluated to: " + condValue);
 
-        SimpleLangParser.ExpContext cond = ctx.exp();
-        Integer condValue = visit(cond);
         if (condValue > 0) {
-
-            SimpleLangParser.BlockContext thenBlock = ctx.block(0);
-            return visit(thenBlock);
-
+            System.out.println("Executing THEN branch");
+            return visit(ctx.block(0));
         } else {
-
-            SimpleLangParser.BlockContext elseBlock = ctx.block(1);
-            return visit(elseBlock);
-
+            System.out.println("Executing ELSE branch");
+            return visit(ctx.block(1));
         }
-
     }
+
 
     @Override
     public Integer visitWhileExpr(SimpleLangParser.WhileExprContext ctx) {
@@ -262,11 +330,19 @@ public class SimpleLangInterpreter extends AbstractParseTreeVisitor<Integer> imp
     @Override
     public Integer visitIdExpr(SimpleLangParser.IdExprContext ctx) {
         String varName = ctx.Idfr().getText();
+        System.out.println("Attempting to resolve variable: " + varName);
+
+        // Check current frame for the variable
         if (!frames.peek().containsKey(varName)) {
-            throw new RuntimeException("Undefined variable: " + varName);
+            throw new RuntimeException("Undefined variable: " + varName + " in current frame.");
         }
-        return frames.peek().get(varName);
+
+        Integer value = frames.peek().get(varName);
+        System.out.println("Resolved variable " + varName + " to value: " + value);
+        return value;
     }
+
+
 
     @Override public Integer visitIntExpr(SimpleLangParser.IntExprContext ctx)
     {
@@ -274,6 +350,7 @@ public class SimpleLangInterpreter extends AbstractParseTreeVisitor<Integer> imp
         return Integer.parseInt(ctx.IntLit().getText());
 
     }
+
     @Override public Integer visitEqBinop(SimpleLangParser.EqBinopContext ctx) {
         throw new RuntimeException("Should not be here!");
     }
@@ -283,6 +360,17 @@ public class SimpleLangInterpreter extends AbstractParseTreeVisitor<Integer> imp
     @Override public Integer visitLessEqBinop(SimpleLangParser.LessEqBinopContext ctx) {
         throw new RuntimeException("Should not be here!");
     }
+
+    @Override
+    public Integer visitGreatBinop(SimpleLangParser.GreatBinopContext ctx) {
+        throw new RuntimeException("Should not be here!");
+    }
+
+    @Override
+    public Integer visitGreatEqBinop(SimpleLangParser.GreatEqBinopContext ctx) {
+        throw new RuntimeException("Should not be here!");
+    }
+
     @Override public Integer visitPlusBinop(SimpleLangParser.PlusBinopContext ctx) {
         throw new RuntimeException("Should not be here!");
     }
@@ -290,6 +378,11 @@ public class SimpleLangInterpreter extends AbstractParseTreeVisitor<Integer> imp
         throw new RuntimeException("Should not be here!");
     }
     @Override public Integer visitTimesBinop(SimpleLangParser.TimesBinopContext ctx) {
+        throw new RuntimeException("Should not be here!");
+    }
+
+    @Override
+    public Integer visitDivideBinop(SimpleLangParser.DivideBinopContext ctx) {
         throw new RuntimeException("Should not be here!");
     }
 
