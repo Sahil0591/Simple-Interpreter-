@@ -5,66 +5,65 @@ import java.util.*;
 
 public class SimpleLangInterpreter extends AbstractParseTreeVisitor<Integer> implements SimpleLangVisitor<Integer> {
 
-    private final Map<String, FunctionDetails> global_funcs = new HashMap<>();
+    private final Map<String, Map<String, Object>> global_funcs = new HashMap<>();
     private final Stack<Map<String, Integer>> frames = new Stack<>();
 
-    public class FunctionDetails {
-        public final String name;
-        public final List<SimpleLangParser.Typed_idfrContext> params;
-        public final SimpleLangParser.BodyContext body;
-
-        public FunctionDetails(String name, List<SimpleLangParser.Typed_idfrContext> params, SimpleLangParser.BodyContext body) {
-            this.name = name;
-            this.params = params;
-            this.body = body;
-        }
+    private Map<String, Object> createFunctionDetails(String name, List<SimpleLangParser.Typed_idfrContext> params, SimpleLangParser.BodyContext body) {
+        // Create a map to store function details
+        Map<String, Object> functionDetails = new HashMap<>();
+        functionDetails.put("name", name);
+        functionDetails.put("params", params);
+        functionDetails.put("body", body);
+        return functionDetails;
     }
+
     public Integer visitProgram(SimpleLangParser.ProgContext ctx, String[] args) {
         //System.out.println("Arguments passed to program: " + Arrays.toString(args));
 
         for (SimpleLangParser.DecContext dec : ctx.dec()) {
             String functionName = dec.typed_idfr(0).Idfr().getText();
-            FunctionDetails funcDetails = new FunctionDetails(
+            Map<String, Object> funcDetails = createFunctionDetails(
                     functionName,
                     dec.typed_idfr().subList(1, dec.typed_idfr().size()),
                     dec.body()
             );
             global_funcs.put(functionName, funcDetails);
         }
-        FunctionDetails mainFunction = global_funcs.get("main");
-        //System.out.println("Main function details: " + mainFunction.name + ", parameters: " + mainFunction.params);
+        Map<String, Object> mainFunction = global_funcs.get("main");
+
+        //System.out.println("Main function details: " + mainFunction.get("name") + ", parameters: " + mainFunction.get("params"));
 
         Map<String, Integer> newFrame = new HashMap<>();
-        for (int i = 0; i < args.length; i++) {
-            String paramName = mainFunction.params.get(i).Idfr().getText();
-            int value = args[i].equals("true") ? 1 : args[i].equals("false") ? 0 : Integer.parseInt(args[i]);
-            newFrame.put(paramName, value);
-            //System.out.println("Bound parameter " + paramName + " to value " + value);
+        Object paramsObj = mainFunction.get("params");
+
+        if (paramsObj instanceof List<?>) {
+            @SuppressWarnings("unchecked")
+            List<SimpleLangParser.Typed_idfrContext> params = (List<SimpleLangParser.Typed_idfrContext>) paramsObj;
+
+            for (int i = 0; i < args.length; i++) {
+                String paramName = params.get(i).Idfr().getText();
+                int value = args[i].equals("true") ? 1 : args[i].equals("false") ? 0 : Integer.parseInt(args[i]);
+                newFrame.put(paramName, value);
+            }
+        } else {
+            throw new RuntimeException("Expected a List<SimpleLangParser.Typed_idfrContext> but got: " + (paramsObj != null ? paramsObj.getClass() : "null"));
         }
 
         frames.push(newFrame);
-        //System.out.println("Frame pushed: " + newFrame);
-        Integer result = visit(mainFunction.body);
-        //System.out.println("Final result of program: " + result);
-
+        Integer result = visit((SimpleLangParser.BodyContext) mainFunction.get("body"));
         return result;
     }
 
-
-    @Override public Integer visitProg(SimpleLangParser.ProgContext ctx)
-    {
-
+    @Override
+    public Integer visitProg(SimpleLangParser.ProgContext ctx) {
         throw new RuntimeException("Should not be here!");
-
     }
 
-    @Override public Integer visitDec(SimpleLangParser.DecContext ctx)
-    {
-
+    @Override
+    public Integer visitDec(SimpleLangParser.DecContext ctx) {
         Integer returnValue = visit(ctx.body());
         frames.pop();
         return returnValue;
-
     }
 
     @Override public Integer visitTyped_idfr(SimpleLangParser.Typed_idfrContext ctx)
@@ -208,40 +207,47 @@ public class SimpleLangInterpreter extends AbstractParseTreeVisitor<Integer> imp
     @Override
     public Integer visitInvokeExpr(SimpleLangParser.InvokeExprContext ctx) {
         String functionName = ctx.Idfr().getText();
-        FunctionDetails funcDetails = global_funcs.get(functionName);
+
+        // Retrieve function details from global_funcs
+        Map<String, Object> funcDetails = global_funcs.get(functionName);
         if (funcDetails == null) {
             throw new RuntimeException("Undefined function: " + functionName);
         }
 
+        // Extract parameters and body from funcDetails
+        @SuppressWarnings("unchecked")
+        List<SimpleLangParser.Typed_idfrContext> params = (List<SimpleLangParser.Typed_idfrContext>) funcDetails.get("params");
+        SimpleLangParser.BodyContext body = (SimpleLangParser.BodyContext) funcDetails.get("body");
+
         // Debug: Verify context alignment
-        //System.out.println("Invoking function: " + functionName);
-        //System.out.println("Function parameters: " + funcDetails.params);
-        //System.out.println("Arguments in ctx: " + ctx.args);
+        // System.out.println("Invoking function: " + functionName);
+        // System.out.println("Function parameters: " + params);
+        // System.out.println("Arguments in ctx: " + ctx.args);
 
         // Create a new frame for the function
         Map<String, Integer> newFrame = new HashMap<>();
         for (int i = 0; i < ctx.args.size(); i++) {
-            String paramName = funcDetails.params.get(i).Idfr().getText();
+            String paramName = params.get(i).Idfr().getText();
             Integer argValue = visit(ctx.args.get(i)); // Evaluate arguments
             if (argValue == null) {
                 throw new RuntimeException("Argument " + ctx.args.get(i).getText() + " evaluated to null.");
             }
             newFrame.put(paramName, argValue);
-            //System.out.println("Mapped parameter " + paramName + " to value " + argValue);
+            // System.out.println("Mapped parameter " + paramName + " to value " + argValue);
         }
 
         // Push the frame and execute the function body
         frames.push(newFrame);
-        //System.out.println("Frame before function execution: " + frames);
+        // System.out.println("Frame before function execution: " + frames);
 
         Integer returnValue;
         try {
-            returnValue = visit(funcDetails.body);
+            returnValue = visit(body); // Visit the body of the function
         } finally {
             frames.pop(); // Ensure proper cleanup of the frame
         }
 
-        //System.out.println("Function " + functionName + " returned: " + returnValue);
+        // System.out.println("Function " + functionName + " returned: " + returnValue);
         return returnValue;
     }
 
